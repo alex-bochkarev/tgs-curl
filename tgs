@@ -1,0 +1,106 @@
+#!/bin/bash
+
+## set up filenames
+# NOTE: consider checking environment variables?
+
+secfile=$(dirname $0)/tg.bot
+stfile=$(dirname $0)/tg.stickers
+logfile=$(dirname $0)/tgs.log
+
+
+# extract bot token and chat id from the config file
+TOKEN=$(cat $secfile | grep TOKEN | sed -e's/.*=//g')
+CHAT_ID=$(cat $secfile | grep CHAT_ID | sed -e's/.*=//g')
+URL="https://api.telegram.org/bot$TOKEN"
+
+# TODO: check if it is extracted fine
+
+usage(){
+    echo "Usage: $0 [<command> <args>]"
+    echo "where allowed commands are:"
+    echo "-m <text>:  send a text message <text>"
+}
+
+err() {
+    echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" 1>&2;
+}
+die_loud(){
+    usage
+    exit 1
+}
+
+_send_msg(){
+    curl -s -X POST $URL/sendMessage -F chat_id=$CHAT_ID -F text="$1" -F parse_mode="MarkdownV2" > $logfile
+}
+
+_send_img(){
+    curl -s -X POST $URL/sendPhoto -F chat_id=$CHAT_ID -F photo="@$1" -F caption="$1" > $logfile
+}
+
+_send_file(){
+    curl -s -X POST $URL/sendDocument -F chat_id=$CHAT_ID -F document="@$1" -F caption="$1" > $logfile
+}
+
+_send_sticker(){
+    stID=$(egrep -ie"$1" $stfile | head -1 | sed -e"s/^.\+://")
+
+    if [ -z "${stID}" ]; then
+        err "No sticker found for the ID \"$1\" -- please check the list ($stfile). ($0 -l)"
+        exit 1
+    else
+        curl -s -X POST $URL/sendSticker -d chat_id=$CHAT_ID -d sticker="${stID}"
+    fi
+}
+
+######################################################################
+## parse the command line options
+while getopts "lhm:i:s:f:" options; do
+    case "${options}" in
+        m)
+            TEXT=${OPTARG}
+            if [[ $TEXT = "-" ]]
+            then
+                while read LINE; do
+                    _send_msg "$LINE"
+                done < /dev/stdin
+            else
+                echo "text is $TEXT"
+                _send_msg "$TEXT"
+            fi
+            ;;
+        h)
+            usage
+            exit 0
+            ;;
+        i)
+            if test -f "${OPTARG}"; then
+                _send_img "${OPTARG}"
+            else
+                err ${OPTARG} -- file not found
+                exit 1
+            fi
+            ;;
+        f)
+            if test -f "${OPTARG}"; then
+                _send_file "${OPTARG}"
+            else
+                err ${OPTARG} -- file not found
+                exit 1
+            fi
+            ;;
+        s)
+            _send_sticker "${OPTARG}"
+            ;;
+        l)
+            echo "Known stickers:"
+            sed "s/:.*$//" $stfile
+            ;;
+        :)
+            err "Error: -${OPTARG} requires an argument."
+            die_loud
+            ;;
+        *)
+            die_loud
+            ;;
+    esac
+done
