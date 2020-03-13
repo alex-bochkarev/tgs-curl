@@ -16,9 +16,19 @@ URL="https://api.telegram.org/bot$TOKEN"
 # TODO: check if it is extracted fine
 
 usage(){
+    echo "tgs-curl: telegram-send via cURL, (c) A. Bochkarev, 2020"
     echo "Usage: $0 [<command> <args>]"
     echo "where allowed commands are:"
-    echo "-m <text>:  send a text message <text>"
+    echo "-m <text>     send a text message <text>"
+    echo "-i <image>    send an image to be shown inline (<image> must be a .png file)"
+    echo "-f <file>     send a file (as attachment) (<file> is a filename)"
+    echo "-s <sticker>  send a sticker (<sticker> is a sticker-id from $st_file)"
+    echo
+    echo "Working with stickers:"
+    echo "-g            get a sticker (send it to the bot first)"
+    echo "-l            list stickers available in $st_file"
+    echo
+    echo "(see online documentation for more info)"
 }
 
 err() {
@@ -54,7 +64,7 @@ _send_sticker(){
 
 ######################################################################
 ## parse the command line options
-while getopts "lhm:i:s:f:" options; do
+while getopts "glhm:i:s:f:" options; do
     case "${options}" in
         m)
             TEXT=${OPTARG}
@@ -93,6 +103,41 @@ while getopts "lhm:i:s:f:" options; do
         l)
             echo "Known stickers:"
             sed "s/:.*$//" $stfile
+            ;;
+        g)
+            echo "Getting a sticker ID for you. Please send the sticker to your bot now."
+            echo "Press [Enter] to get the sticker or [Ctrl-C] to abort"
+            while [[ $key != $'\x0a' ]]
+            do
+                read -s -N 1 -t 1 key
+            done
+
+            while [ -z "$(echo "$response" | egrep -oe"file_id")" ]
+            do
+                sleep 1
+                response=$(curl -s -X POST $URL/getUpdates -F limit=1 -F offset=-1)
+                echo "response is: $response"
+            done
+            echo "Response is: $response"
+            file_id=$(echo $response | sed -e's/"thumb":{[^}]*}//g' | egrep -oe'"file_id":[^,]+' | sed -e's/.*://g' | sed -e's/"//g' )
+            echo "file_id detected: $file_id. Testing..."
+            response=$(curl -s -X POST $URL/sendSticker -d chat_id=$CHAT_ID -d sticker="${file_id}")
+            if [ -z $(echo $response | egrep -oe'"ok":true') ]; then
+                err "Failed. Response: $response"
+                exit 1
+            else
+                read -r -p "Saving the sticker (enter a short ID or [Ctrl-C] to abort) :" st_name
+                echo "$st_name" | grep -qE '^[A-Za-z0-9\-_]+$' && save_name=$st_name || save_name=""
+                if [ -z "$save_name" ]; then
+                    echo "Wrong name: $st_name. Please use only letters, numbers, '-' and '_' symbols."
+                    echo "Feel free to add the following line to your $stfile manually:"
+                    echo "<your_st_name>:$file_id"
+                    echo "(replacing <your_st_name> with a name the sticker will be referred to)"
+                else
+                    echo "$st_name:$file_id" >> $stfile
+                    echo "Saved as $st_name (to $stfile)"
+                fi
+            fi
             ;;
         :)
             err "Error: -${OPTARG} requires an argument."

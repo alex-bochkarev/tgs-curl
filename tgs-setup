@@ -2,6 +2,7 @@
 
 secfile=$(dirname $0)/tg.bot
 logfile=$(dirname $0)/tgs.log
+stfile=$(dirname $0)/tg.stickers
 
 URL="https://api.telegram.org/bot$1"
 
@@ -39,3 +40,5 @@ case "$response" in
         echo "Config not saved (feel free to put the text between the \"---\" above to $secfile"
         ;;
 esac
+
+echo "sticker_name:code" > $stfile

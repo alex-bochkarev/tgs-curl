@@ -1,0 +1,5 @@
+* TODO Introduce message editing for convenient updates (?)
+* TODO Introduce stickers-checker to find file-id's
+* TODO Add documentation / blogpost
+* TODO Refactor functions
+* TODO Add license
