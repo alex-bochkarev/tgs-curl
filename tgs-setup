@@ -1,0 +1,41 @@
+#!/bin/bash
+
+secfile=$(dirname $0)/tg.bot
+logfile=$(dirname $0)/tgs.log
+
+URL="https://api.telegram.org/bot$1"
+
+echo "Finding CHAT-ID for the bot with TOKEN=$1. Please, send something to the bot via Telegram now"
+echo "Press [Ctrl-C] to abort"
+
+response=$(curl -s "$URL/getUpdates")
+while [ -z $(echo $response | grep -oe"chat") ]
+do
+  sleep 1
+  response=$(curl -s "$URL/getUpdates")
+done
+
+CHAT_ID=$(echo $response | egrep -oe'"chat":{.+*"id":[^,]*,' | egrep -oe'"id":[^,]+' | sed -e's/.*://g')
+echo "INFO: full responce from curl: $response"
+
+curl -s -X POST $URL/sendMessage -F chat_id=$CHAT_ID -F text="The bot is alive" -F parse_mode="MarkdownV2" > $logfile
+echo ""
+echo "(you should have received a message from the bot now)"
+echo ""
+
+echo "CONFIG:"
+echo "---"
+echo TOKEN=$1
+echo CHAT_ID=$CHAT_ID
+echo "---"
+read -r -p "Save the config file with these parameters? [y/n] " response
+case "$response" in
+    [yY][eE][sS]|[yY]) 
+        echo TOKEN=$1 > $secfile
+        echo CHAT_ID=$CHAT_ID >> $secfile
+        echo "file saved ($secfile)."
+        ;;
+    *)
+        echo "Config not saved (feel free to put the text between the \"---\" above to $secfile"
+        ;;
+esac

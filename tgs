@@ -64,7 +64,6 @@ while getopts "lhm:i:s:f:" options; do
                     _send_msg "$LINE"
                 done < /dev/stdin
             else
-                echo "text is $TEXT"
                 _send_msg "$TEXT"
             fi
             ;;
