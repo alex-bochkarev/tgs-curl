@@ -40,7 +40,7 @@ die_loud(){
 }
 
 _send_msg(){
-    curl -s -X POST $URL/sendMessage -F chat_id=$CHAT_ID -F text="$1" -F parse_mode="MarkdownV2" > $logfile
+    curl -s -X POST $URL/sendMessage -d chat_id=$CHAT_ID -d text="$1"> $logfile
 }
 
 _send_img(){

@@ -1,0 +1,63 @@
+#+TITLE: =tgs-curl= -- a simple wrapper around =cURL= for dead-simple telegram bots
+#+OPTIONS: toc:nil
+
+So, these are convenience scripts: a tiny wrapper around a standard [[https://curl.se/][cURL]] program
+(chances are, you have it already installed on your system, if happens to be
+certain sorts of GNU/Linux or MacOS -- but no specific testing was done). The
+purpose is to be able to send quick messages to yourself with a [[https://telegram.org/][Telegram]] chat,
+from the command line (making super-simple, not necessarily interactive bots).
+See a [[https://abochka.people.clemson.edu/tools/2019/09/23/cluster_messages.html][blog post]] for some details on 'what and why'.
+
+(Please note that these scripts were intended for internal use, so they come 'as
+is', without any kind of guarantees.)
+
+* Installation
+  No special procedures are needed -- just download the files/clone the repo to a local
+folder and make sure that files =tgs= and =tgs-setup= are executable (=chmod
+u+x= as necessary -- these are just bash scripts). You might want to add this
+directory to your =PATH= for easy access.
+
+* Usage
+The procedure is as follows:
+- first, you [[https://core.telegram.org/bots#3-how-do-i-create-a-bot][create]] a personal bot (it's simple), and take a note of your =token
+  ID=.
+- then, you'd need to save your bot access data to the file named
+  =tg.bot= (in the same directory as =tgs= script). You could do this either by running =./tgs-setup <token-ID>=
+  (requires =curl= and =egrep=, which were already installed on my Linux system
+  by default), or manually, using the format :
+#+begin_src 
+TOKEN=XXX...:YYY...
+CHAT_ID=NNN...
+#+end_src
+
+After this, sending stuff from the command line can be done as:
+#+begin_src bash
+tgs -m "hello world" # sends a text message
+tgs -i ./my_file.png # sends an image to be shown in the chat.
+tgs -f ./my_file.ext # sends any file as an attachment to the chat.
+tgs -s HappyCat # send a sticker
+#+end_src
+
+Note that for the last command to work you'd need to find the sticker's =file-id=
+first: run =./tgs -g=, send the desired sticker to your bot, and then follow
+instructions to save it. Some usage info is available from =./tgs= (without
+arguments).
+
+Note that I didn't do any proper testing, but some more advanced use-cases seem
+to work out, such as:
+- =./my_arbitrary_program | ./tgs -m -= will redirect the output to your chat;
+- =ls | ./tgs -m= will send you the contents of the current directory;
+- =echo "I have $(ls *.org | wc -l) org files in the dir" | ./tgs -m -= will
+  send the text "I have ... org files in the dir", substituting a valid number
+  of *.org* files in the corresponding directory,
+- and so on.
+
+In principle, it seems not very difficult to implement progress bars, message
+updates, and some other nice things -- but if you need this, you might want to
+consider a better/more complicated interface to Telegram bots (which already exist,
+in Python or even as shell scripts). The purpose of this tool was to get a
+small-footprint script to get the job done quickly.
+  
+* Feedback and contributions
+  ... are very welcome -- please feel free to open an issue here, or [[https://abochka.people.clemson.edu/contact/][reach out]]
+  to me, preferably via email.
