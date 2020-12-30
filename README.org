@@ -23,7 +23,7 @@ The procedure is as follows:
   ID=.
 - then, you'd need to save your bot access data to the file named
   =tg.bot= (in the same directory as =tgs= script). You could do this either by running =./tgs-setup <token-ID>=
-  (requires =curl= and =egrep=, which were already installed on my Linux system
+  (requires =curl= and =egrep=, which were already installed on my GNU/Linux system
   by default), or manually, using the format :
 #+begin_src 
 TOKEN=XXX...:YYY...
@@ -35,13 +35,12 @@ After this, sending stuff from the command line can be done as:
 tgs -m "hello world" # sends a text message
 tgs -i ./my_file.png # sends an image to be shown in the chat.
 tgs -f ./my_file.ext # sends any file as an attachment to the chat.
-tgs -s HappyCat # send a sticker
+tgs -s HappyCat # sends a sticker
 #+end_src
 
 Note that for the last command to work you'd need to find the sticker's =file-id=
 first: run =./tgs -g=, send the desired sticker to your bot, and then follow
-instructions to save it. Some usage info is available from =./tgs= (without
-arguments).
+instructions to save it. Some usage info is available from =./tgs -h=.
 
 Note that I didn't do any proper testing, but some more advanced use-cases seem
 to work out, such as:
@@ -49,7 +48,7 @@ to work out, such as:
   (note the =-= symbol in the very end of the command!);
 - =ls | ./tgs -m -= will send you the contents of the current directory;
 - =echo "I have $(ls *.org | wc -l) org files in the dir" | ./tgs -m -= will
-  send the text "I have ... org files in the dir", substituting a valid number
+  send the text "I have ... org files in the dir", substituting the valid number
   of =*.org= files in the corresponding directory,
 - and so on.
 

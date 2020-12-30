@@ -22,7 +22,7 @@ usage(){
     echo "-m <text>     send a text message <text>"
     echo "-i <image>    send an image to be shown inline (<image> must be a .png file)"
     echo "-f <file>     send a file (as attachment) (<file> is a filename)"
-    echo "-s <sticker>  send a sticker (<sticker> is a sticker-id from $st_file)"
+    echo "-s <sticker>  send a sticker (<sticker> is a sticker-id from $stfile)"
     echo
     echo "Working with stickers:"
     echo "-g            get a sticker (send it to the bot first)"
