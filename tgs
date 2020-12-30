@@ -26,7 +26,7 @@ usage(){
     echo
     echo "Working with stickers:"
     echo "-g            get a sticker (send it to the bot first)"
-    echo "-l            list stickers available in $st_file"
+    echo "-l            list stickers available in $stfile"
     echo
     echo "(see online documentation for more info)"
 }

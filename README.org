@@ -45,11 +45,12 @@ arguments).
 
 Note that I didn't do any proper testing, but some more advanced use-cases seem
 to work out, such as:
-- =./my_arbitrary_program | ./tgs -m -= will redirect the output to your chat;
-- =ls | ./tgs -m= will send you the contents of the current directory;
+- =./my_arbitrary_program | ./tgs -m -= will redirect the output to your chat
+  (note the =-= symbol in the very end of the command!);
+- =ls | ./tgs -m -= will send you the contents of the current directory;
 - =echo "I have $(ls *.org | wc -l) org files in the dir" | ./tgs -m -= will
   send the text "I have ... org files in the dir", substituting a valid number
-  of *.org* files in the corresponding directory,
+  of =*.org= files in the corresponding directory,
 - and so on.
 
 In principle, it seems not very difficult to implement progress bars, message
